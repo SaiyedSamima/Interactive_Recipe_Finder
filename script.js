@@ -11,6 +11,22 @@ const modal = document.getElementById("recipe-modal");
 const modalContent = document.getElementById("recipe-details-content");
 const modalCloseBtn = document.getElementById("modal-close-btn");
 
+// ...existing code...
+
+searchInput.addEventListener("input", () => {
+  const value = searchInput.value.trim();
+  if (value.length === 1 && /^[a-zA-Z]$/.test(value)) {
+    listMealsByFirstLetter(value.toLowerCase());
+  } else if (value.length > 1) {
+    searchRecipes(value);
+  } else {
+    resultsGrid.innerHTML = "";
+    clearMessage();
+  }
+});
+
+// ...existing code...
+
 searchForm.addEventListener("submit", (e) => {
   e.preventDefault();
   const searchTerm = searchInput.value.trim();
@@ -44,6 +60,30 @@ async function searchRecipes(query) {
   }
 }
 
+// ...existing code...
+
+async function listMealsByFirstLetter(letter) {
+  showMessage(`Listing meals starting with "${letter.toUpperCase()}"...`, false, true);
+  resultsGrid.innerHTML = "";
+
+  try {
+    const response = await fetch(`https://www.themealdb.com/api/json/v1/1/search.php?f=${letter}`);
+    if (!response.ok) throw new Error("Network error");
+
+    const data = await response.json();
+    clearMessage();
+
+    if (data.meals) {
+      displayRecipes(data.meals);
+    } else {
+      showMessage(`No meals found starting with "${letter.toUpperCase()}".`);
+    }
+  } catch (error) {
+    showMessage("Failed to fetch meals by letter. Please try again.", true);
+  }
+}
+
+// ...existing code...
 function showMessage(message, isError = false, isLoading = false) {
   messageArea.textContent = message;
   if (isError) messageArea.classList.add("error");
@@ -74,6 +114,7 @@ function displayRecipes(recipes) {
     resultsGrid.appendChild(recipeDiv);
   });
 }
+
 
 randomButton.addEventListener("click", getRandomRecipe);
 
